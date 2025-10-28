@@ -11,23 +11,26 @@ Incluye dos microservicios (C++ y Python), base de datos PostgreSQL y caché Red
 Cliente / Frontend
         │
         ▼
- ┌─────────────────────────────┐
+ ┌───────────────────────────────┐
  │ Servicio B (Python / FastAPI)
  │ puerto 8090
  │ - API de consulta / agregación
  │ - Cambio de unidades (°C↔°F)
  │ - CORS configurado
  │ - Caché persistente (Redis)
- │ - Reintentos y tolerancia a fallos
- └────────────▲────────────────┘
+ │ - Reintentos y tolerancia a
+ │ fallos
+ └────────────▲──────────────────┘
               │
               ▼
- ┌─────────────────────────────┐
+ ┌───────────────────────────────┐
  │ Servicio A (C++ / libpqxx)
  │ puerto 8080
  │ - Ingesta CSV en PostgreSQL
- │ - Endpoints `/ingest/csv`, `/cities`, `/records`, `/health`
- └────────────▲────────────────┘
+ │ - Endpoints `/ingest/csv`,
+ │ `/cities`, `/records`,
+ │ `/health`
+ └────────────▲──────────────────┘
               │
               ▼
        PostgreSQL 18 (alpine)
