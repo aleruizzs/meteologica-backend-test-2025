@@ -1,0 +1,5 @@
+# Solo estos críticos deben ser LF siempre
+packages.txt text eol=lf
+Dockerfile   text eol=lf
+*.sh         text eol=lf
+*.py         text eol=lf
