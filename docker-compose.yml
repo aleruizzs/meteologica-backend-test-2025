@@ -1,0 +1,94 @@
+services:
+    db: 
+        image: postgres:18-alpine
+        environment:
+            POSTGRES_USER: meteo
+            POSTGRES_PASSWORD: meteo
+            POSTGRES_DB: meteo
+        volumes:
+            - pgdata:/var/lib/postgresql/18/docker
+            - ./db/init:/docker-entrypoint-initdb.d:ro 
+        ports:
+            - "5432:5432"
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready --username meteo --dbname meteo"]
+            interval: 5s
+            timeout: 3s
+            retries: 10
+        restart: unless-stopped
+    servicioa:
+        build: ./servicioA
+        environment:
+            POSTGRES_USER: meteo
+            POSTGRES_PASSWORD: meteo
+            POSTGRES_DB: meteo
+            DB_HOST: db
+            DB_PORT: 5432
+        depends_on:
+            db:
+                condition: service_healthy
+        ports:
+            - "8080:8080"
+        tty: true
+        stdin_open: true
+        volumes:
+            - ./servicioA:/app
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+            interval: 5s
+            timeout: 3s
+            retries: 5
+        command: >
+            bash -lc "
+                cmake -S . -B build -DCMAKE_BUILD_TYPE=Release &&
+                cmake --build build -j &&
+                ./build/servicioa --server
+            "
+    redis:
+        image: redis:7-alpine
+        command: ["redis-server", "--appendonly", "yes"]
+        volumes:
+        - redisdata:/data
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 5s
+            timeout: 3s
+            retries: 10
+        restart: unless-stopped
+    serviciob:
+        build: ./servicioB
+        environment:
+            SERVICE_A_BASE_URL: http://servicioa:8080
+            CACHE_TTL_SECONDS: 600
+            ALLOW_ORIGINS: "*"  
+            ALLOW_METHODS: GET,OPTIONS
+            ALLOW_HEADERS: "*"
+            EXPOSE_HEADERS: "" 
+            ALLOW_CREDENTIALS: "false"
+            CORS_MAX_AGE: "600"
+            REDIS_URL: redis://redis:6379/0
+        depends_on:
+            servicioa:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        ports:
+        - "8090:8090"
+        volumes:
+        - ./servicioB:/app
+        restart: unless-stopped
+        tty: true
+        stdin_open: true
+        command: >
+            bash -lc "source /opt/venv/bin/activate
+            && pip install -r requirements.txt
+            && uvicorn src.main:app --host 0.0.0.0 --port 8090 --reload"
+        healthcheck:
+            test: ["CMD", "curl", "-fsS", "http://localhost:8090/health"]
+            interval: 5s
+            timeout: 3s
+            retries: 5
+volumes:
+    pgdata:
+    redisdata:

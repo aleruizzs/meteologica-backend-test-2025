@@ -1,0 +1,312 @@
+openapi: 3.0.3
+info:
+  title: Servicio A - Ingesta y lectura de datos meteorológicos
+  version: "1.0.0"
+  description: |
+    API del **Servicio A** (C++) para la prueba técnica Backend 2025.
+    - Ingesta de CSV normalizado en PostgreSQL.
+    - Lectura en crudo paginada de registros.
+    - Listado de ciudades disponibles.
+    - Endpoint de salud.
+
+servers:
+  - url: http://localhost:8080
+    description: Local dev
+
+tags:
+  - name: Health
+    description: Comprobaciones de estado
+  - name: Ingest
+    description: Ingesta de ficheros CSV
+  - name: Query
+    description: Lectura de datos en crudo
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Estado del servicio y de la base de datos
+      responses:
+        '200':
+          description: Base de datos disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                ok:
+                  value: { status: "DB OK" }
+        '503':
+          description: Base de datos no disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                db_down:
+                  value:
+                    error: database unavailable
+
+  /ingest/csv:
+    post:
+      tags: [Ingest]
+      summary: Ingresa un CSV con datos meteorológicos
+      description: |
+        Acepta **multipart/form-data** (campo `file`, `csv` o `upload`) o **cuerpo raw** con `text/csv`.
+        El servidor:
+        1. Calcula el SHA-256 del fichero.
+        2. Valida y normaliza filas.
+        3. Inserta en la tabla `weather_readings` con `ON CONFLICT (city, date) DO NOTHING`.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: CSV a subir (también se aceptan `csv` o `upload`)
+                csv:
+                  type: string
+                  format: binary
+                upload:
+                  type: string
+                  format: binary
+          text/csv:
+            schema:
+              type: string
+              description: CSV en el cuerpo raw
+      responses:
+        '200':
+          description: Resultado de la ingesta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+              examples:
+                example:
+                  value:
+                    rows_inserted: 3650
+                    rows_rejected: 2
+                    elapsed_ms: 1240
+                    file_checksum: "sha256:deadbeef..."
+        '400':
+          description: CSV vacío o formato inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_csv:
+                  value:
+                    error: no csv data provided; send raw body or multipart file
+                empty_header:
+                  value:
+                    error: empty csv (no header)
+        '503':
+          description: Error de base de datos durante la inserción
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                db_down:
+                  value:
+                    error: database unavailable
+                    details: "connection refused"
+
+  /cities:
+    get:
+      tags: [Query]
+      summary: Lista de ciudades disponibles
+      responses:
+        '200':
+          description: Lista de ciudades distintas en la base de datos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CityList'
+              examples:
+                example:
+                  value:
+                    cities: ["Barcelona", "Granada", "Madrid"]
+        '503':
+          description: Error de base de datos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                db_down:
+                  value:
+                    error: database unavailable
+
+  /records:
+    get:
+      tags: [Query]
+      summary: Registros en crudo por ciudad y rango de fechas (paginado)
+      parameters:
+        - in: query
+          name: city
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Fecha inicial (YYYY-MM-DD)
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Fecha final (YYYY-MM-DD)
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Página de resultados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordsResponse'
+              examples:
+                example:
+                  value:
+                    city: "Madrid"
+                    from: "2025-10-01"
+                    to: "2025-10-31"
+                    page: 1
+                    limit: 10
+                    total: 20
+                    total_pages: 2
+                    items:
+                      - { date: "2025-10-12", temp_max_c: 11.55, temp_min_c: 6.25, precip_mm: 0.0, cloud_pct: 10 }
+                      - { date: "2025-10-13", temp_max_c: 12.35, temp_min_c: 5.25, precip_mm: 0.2, cloud_pct: 60 }
+        '400':
+          description: Parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_date:
+                  value:
+                    error: invalid date format
+                    hint: use YYYY-MM-DD
+                range_error:
+                  value:
+                    error: "`from` must be <= `to`"
+        '503':
+            description: Error de base de datos
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+                examples:
+                  db_down:
+                    value:
+                      error: database unavailable
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "DB OK"
+    IngestResponse:
+      type: object
+      required: [rows_inserted, rows_rejected, elapsed_ms, file_checksum]
+      properties:
+        rows_inserted:
+          type: integer
+          minimum: 0
+        rows_rejected:
+          type: integer
+          minimum: 0
+        elapsed_ms:
+          type: integer
+          minimum: 0
+        file_checksum:
+          type: string
+          description: Prefijado con 'sha256:'
+    CityList:
+      type: object
+      properties:
+        cities:
+          type: array
+          items:
+            type: string
+      required: [cities]
+    Reading:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        temp_max_c:
+          type: number
+        temp_min_c:
+          type: number
+        precip_mm:
+          type: number
+          minimum: 0
+        cloud_pct:
+          type: integer
+          minimum: 0
+          maximum: 100
+      required: [date, temp_max_c, temp_min_c, precip_mm, cloud_pct]
+    RecordsResponse:
+      type: object
+      properties:
+        city:
+          type: string
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reading'
+      required: [city, from, to, page, limit, total, total_pages, items]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+        hint:
+          type: string
