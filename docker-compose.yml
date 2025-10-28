@@ -57,14 +57,16 @@ services:
             retries: 10
         restart: unless-stopped
     serviciob:
-        build: ./servicioB
+        build:
+            context: ./servicioB
+            target: dev                               # <- usa la stage dev (sí tiene /opt/venv)
         environment:
             SERVICE_A_BASE_URL: http://servicioa:8080
-            CACHE_TTL_SECONDS: 600
-            ALLOW_ORIGINS: "*"  
-            ALLOW_METHODS: GET,OPTIONS
+            CACHE_TTL_SECONDS: "600"
+            ALLOW_ORIGINS: "*"
+            ALLOW_METHODS: "GET,OPTIONS"
             ALLOW_HEADERS: "*"
-            EXPOSE_HEADERS: "" 
+            EXPOSE_HEADERS: ""
             ALLOW_CREDENTIALS: "false"
             CORS_MAX_AGE: "600"
             REDIS_URL: redis://redis:6379/0
@@ -74,21 +76,15 @@ services:
             redis:
                 condition: service_healthy
         ports:
-        - "8090:8090"
-        volumes:
-        - ./servicioB:/app
+            - "8090:8090"
         restart: unless-stopped
-        tty: true
-        stdin_open: true
-        command: >
-            bash -lc "source /opt/venv/bin/activate
-            && pip install -r requirements.txt
-            && uvicorn src.main:app --host 0.0.0.0 --port 8090 --reload"
+        command: ["bash","-lc","uvicorn src.main:app --host 0.0.0.0 --port 8090"]
         healthcheck:
-            test: ["CMD", "curl", "-fsS", "http://localhost:8090/health"]
+            test: ["CMD", "bash", "-lc", "exec 3<>/dev/tcp/127.0.0.1/8090"]
             interval: 5s
             timeout: 3s
-            retries: 5
+            retries: 10
+            start_period: 10s
 volumes:
     pgdata:
     redisdata:

@@ -1,0 +1,53 @@
+==========================================================
+
+Archivos y Directorios de Compilación, Ejecutables y Objetos
+
+==========================================================
+
+Directorios de salida de compilación comunes
+
+/build/
+/dist/
+/bin/
+/out/
+/target/
+
+Directorios de compilación anidados (el que te da problemas)
+
+*/build/
+
+Archivos objeto y estáticos/dinámicos
+
+*.o
+*.a
+*.so
+*.dll
+*.exe
+*.out
+*.obj
+*.lib
+*.gch
+
+==========================================================
+
+Archivos de Sistema, Logs y Datos Temporales
+
+==========================================================
+
+Archivos temporales de registro y CSV de salida (los que aparecen como 'log.txt', 'melou.csv')
+
+*.log
+*.csv
+*.tmp
+/tmp/
+pycache/
+
+Archivos de Git ignorados (.gitattributes es de Git, pero a veces se marca por error)
+
+.gitattributes
+
+Directorios de IDEs (si no los tienes, Git los ignorará igual)
+
+.idea/
+.vscode/
+.DS_Store

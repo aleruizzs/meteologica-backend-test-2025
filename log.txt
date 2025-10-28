@@ -1,0 +1,164 @@
+Apagando contenedores previos...
+Levantando stack...
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.18kB done
+#1 DONE 0.0s
+
+#2 [servicioa internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.43kB 0.0s done
+#2 DONE 0.0s
+
+#3 [serviciob internal] load build definition from Dockerfile
+#3 transferring dockerfile: 924B 0.0s done
+#3 DONE 0.0s
+
+#4 [servicioa internal] load metadata for docker.io/library/debian:bookworm-slim
+#4 DONE 0.0s
+
+#5 [servicioa internal] load .dockerignore
+#5 transferring context: 2B 0.0s done
+#5 DONE 0.0s
+
+#6 [serviciob internal] load metadata for docker.io/library/python:3.11-slim
+#6 ...
+
+#7 [servicioa builder 1/6] FROM docker.io/library/debian:bookworm-slim
+#7 DONE 0.0s
+
+#8 [servicioa internal] load build context
+#8 ...
+
+#6 [serviciob internal] load metadata for docker.io/library/python:3.11-slim
+#6 DONE 0.7s
+
+#9 [serviciob internal] load .dockerignore
+#9 transferring context: 2B 0.0s done
+#9 DONE 0.0s
+
+#10 [serviciob tests 1/6] FROM docker.io/library/python:3.11-slim@sha256:8eb5fc663972b871c528fef04be4eaa9ab8ab4539a5316c4b8c133771214a617
+#10 DONE 0.0s
+
+#11 [serviciob internal] load build context
+#11 transferring context: 472B 0.1s done
+#11 DONE 0.1s
+
+#12 [serviciob tests 3/6] COPY requirements.txt .
+#12 CACHED
+
+#13 [serviciob tests 4/6] RUN pip install --no-cache-dir -r requirements.txt pytest pytest-asyncio httpx fastapi uvicorn
+#13 CACHED
+
+#14 [serviciob tests 5/6] COPY src/ ./src/
+#14 CACHED
+
+#15 [serviciob tests 2/6] WORKDIR /app
+#15 CACHED
+
+#16 [serviciob tests 6/6] COPY tests/ ./tests/
+#16 CACHED
+
+#17 [serviciob] exporting to image
+#17 exporting layers done
+#17 writing image sha256:526befd2b1436ac6628838f85a01eaac28ba06d4515fadb910b9e7c1ca975ee9 done
+#17 naming to docker.io/library/meteologica-backend-test-2025-serviciob done
+#17 DONE 0.0s
+
+#8 [servicioa internal] load build context
+#8 transferring context: 6.97kB 0.7s done
+#8 DONE 0.8s
+
+#18 [servicioa runtime 2/3] RUN apt-get update && apt-get install -y --no-install-recommends     libpqxx-dev libpq5 ca-certificates &&     rm -rf /var/lib/apt/lists/*
+#18 CACHED
+
+#19 [servicioa builder 2/6] RUN apt-get update && apt-get install -y --no-install-recommends     build-essential cmake pkg-config libpqxx-dev libpq-dev ca-certificates     nlohmann-json3-dev  && rm -rf /var/lib/apt/lists/*
+#19 CACHED
+
+#20 [servicioa builder 5/6] RUN cmake -S . -B /build -DCMAKE_BUILD_TYPE=Release &&     cmake --build /build -j
+#20 CACHED
+
+#21 [servicioa builder 4/6] COPY . .
+#21 CACHED
+
+#22 [servicioa builder 6/6] RUN cp /build/servicioa /servicioa
+#22 CACHED
+
+#23 [servicioa builder 3/6] WORKDIR /src
+#23 CACHED
+
+#24 [servicioa runtime 3/3] COPY --from=builder /servicioa /usr/local/bin/servicioa
+#24 CACHED
+
+#25 [servicioa] exporting to image
+#25 exporting layers done
+#25 writing image sha256:14006aa5654167155cfcdb3371471f37167632fde933c855a3a9f7d50ea6dac5 done
+#25 naming to docker.io/library/meteologica-backend-test-2025-servicioa done
+#25 DONE 0.0s
+
+#26 [serviciob] resolving provenance for metadata file
+#26 DONE 0.0s
+
+#27 [servicioa] resolving provenance for metadata file
+#27 DONE 0.0s
+Attaching to db-1, redis-1, servicioa-1, serviciob-1
+redis-1  | 1:C 28 Oct 2025 17:18:09.622 # WARNING Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition. Being disabled, it can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+redis-1  | 1:C 28 Oct 2025 17:18:09.622 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+redis-1  | 1:C 28 Oct 2025 17:18:09.622 * Redis version=7.4.6, bits=64, commit=00000000, modified=0, pid=1, just started
+redis-1  | 1:C 28 Oct 2025 17:18:09.622 * Configuration loaded
+redis-1  | 1:M 28 Oct 2025 17:18:09.623 * monotonic clock: POSIX clock_gettime
+redis-1  | 1:M 28 Oct 2025 17:18:09.624 * Running mode=standalone, port=6379.
+redis-1  | 1:M 28 Oct 2025 17:18:09.625 * Server initialized
+redis-1  | 1:M 28 Oct 2025 17:18:09.630 * Creating AOF base file appendonly.aof.1.base.rdb on server start
+redis-1  | 1:M 28 Oct 2025 17:18:09.647 * Creating AOF incr file appendonly.aof.1.incr.aof on server start
+redis-1  | 1:M 28 Oct 2025 17:18:09.647 * Ready to accept connections tcp
+db-1     | The files belonging to this database system will be owned by user "postgres".
+db-1     | This user must also own the server process.
+db-1     | 
+db-1     | The database cluster will be initialized with locale "en_US.utf8".
+db-1     | The default database encoding has accordingly been set to "UTF8".
+db-1     | The default text search configuration will be set to "english".
+db-1     | 
+db-1     | Data page checksums are enabled.
+db-1     | 
+db-1     | fixing permissions on existing directory /var/lib/postgresql/18/docker ... ok
+db-1     | creating subdirectories ... ok
+db-1     | selecting dynamic shared memory implementation ... posix
+db-1     | selecting default "max_connections" ... 100
+db-1     | selecting default "shared_buffers" ... 128MB
+db-1     | selecting default time zone ... UTC
+db-1     | creating configuration files ... ok
+db-1     | running bootstrap script ... ok
+db-1     | performing post-bootstrap initialization ... ok
+db-1     | syncing data to disk ... ok
+db-1     | 
+db-1     | 
+db-1     | Success. You can now start the database server using:
+db-1     | 
+db-1     |     pg_ctl -D /var/lib/postgresql/18/docker -l logfile start
+db-1     | 
+db-1     | waiting for server to start....2025-10-28 17:18:11.027 UTC [42] LOG:  starting PostgreSQL 18.0 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+db-1     | 2025-10-28 17:18:11.032 UTC [42] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+db-1     | 2025-10-28 17:18:11.047 UTC [48] LOG:  database system was shut down at 2025-10-28 17:18:10 UTC
+db-1     | 2025-10-28 17:18:11.054 UTC [42] LOG:  database system is ready to accept connections
+db-1     |  done
+db-1     | server started
+db-1     | CREATE DATABASE
+db-1     | 
+db-1     | 
+db-1     | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/01_schema.sql
+db-1     | CREATE TABLE
+db-1     | CREATE INDEX
+db-1     | 
+db-1     | 
+db-1     | waiting for server to shut down....2025-10-28 17:18:11.270 UTC [42] LOG:  received fast shutdown request
+db-1     | 2025-10-28 17:18:11.275 UTC [42] LOG:  aborting any active transactions
+db-1     | 2025-10-28 17:18:11.278 UTC [42] LOG:  background worker "logical replication launcher" (PID 51) exited with exit code 1
+db-1     | 2025-10-28 17:18:11.279 UTC [46] LOG:  shutting down
+db-1     | 2025-10-28 17:18:11.283 UTC [46] LOG:  checkpoint starting: shutdown immediate
+db-1     | 2025-10-28 17:18:11.408 UTC [46] LOG:  checkpoint complete: wrote 950 buffers (5.8%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.025 s, sync=0.089 s, total=0.130 s; sync files=310, longest=0.004 s, average=0.001 s; distance=4384 kB, estimate=4384 kB; lsn=0/1BA7490, redo lsn=0/1BA7490
+db-1     | 2025-10-28 17:18:11.429 UTC [42] LOG:  database system is shut down
+db-1     |  done
+db-1     | server stopped
+db-1     | 
+db-1     | PostgreSQL init process complete; ready for start up.
+db-1     | 
+servicioa-1  | HTTP server on :8080

@@ -17,3 +17,25 @@ find_package(OpenSSL REQUIRED)
 target_link_libraries(servicioa PRIVATE OpenSSL::Crypto)
 target_include_directories(servicioa PRIVATE ${CMAKE_SOURCE_DIR}/src/third_party)
 target_compile_definitions(servicioa PRIVATE CPPHTTPLIB_MULTIPART_FORM_DATA)
+
+
+enable_testing()
+
+add_library(servicioa_objs
+    src/utils.cpp
+    src/db_config.cpp
+)
+target_include_directories(servicioa_objs PUBLIC src src/third_party)
+target_link_libraries(servicioa_objs pqxx pq)
+
+add_executable(test_utils tests/test_utils.cpp)
+target_link_libraries(test_utils PRIVATE servicioa_objs)
+add_test(NAME test_utils COMMAND test_utils)
+
+add_executable(test_conninfo tests/test_conninfo.cpp)
+target_link_libraries(test_conninfo PRIVATE servicioa_objs)
+add_test(NAME test_conninfo COMMAND test_conninfo)
+
+add_executable(test_ingest_sample tests/test_ingest_sample.cpp)
+target_link_libraries(test_ingest_sample PRIVATE servicioa_objs)
+add_test(NAME test_ingest_sample COMMAND test_ingest_sample)

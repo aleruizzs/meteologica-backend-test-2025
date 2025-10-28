@@ -1,5 +1,5 @@
-FROM debian:bookworm-slim
-
+# ---------- dev: entorno interactivo con bash ----------
+FROM debian:bookworm-slim AS dev
 WORKDIR /app
 
 COPY packages.txt .
@@ -13,15 +13,21 @@ ENV PATH="/opt/venv/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# instala deps Python (si cambias requirements.txt, se re-evaluará esta capa)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# usuario no-root como en A
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8090
-
-# Igual que A: dejamos un shell para trabajar dentro sin cerrar el contenedor
 CMD ["bash"]
+
+# ---------- tests: corre pytest ----------
+FROM python:3.11-slim AS tests
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt pytest pytest-asyncio httpx fastapi uvicorn
+ENV PYTHONPATH=/app
+COPY src/ ./src/
+COPY tests/ ./tests/
+CMD ["pytest","-q"]

@@ -29,11 +29,11 @@ int main(int argc, char** argv){
     DBconfig config = build_config();
 
     // Muestra por pantalla los datos de la BD, ocultando la contraseña
-    cout << config << endl;
+    //cout << config << endl;
 
     // Muestra por pantalla todos los datos de la BD, solo para depurar
     string conninfo = build_conninfo(config);
-    cout << conninfo << endl;
+    //cout << conninfo << endl;
         
     if (argc > 1 && string(argv[1]) == "--server"){
         httplib::Server svr;
