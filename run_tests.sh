@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "Apagando contenedores previos..."
+docker compose down -v
+
 echo ">> Construyendo imágenes de test..."
 docker compose -f docker-compose.tests.yml build
 
