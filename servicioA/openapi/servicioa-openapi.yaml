@@ -200,8 +200,8 @@ paths:
                     total: 20
                     total_pages: 2
                     items:
-                      - { date: "2025-10-12", temp_max_c: 11.55, temp_min_c: 6.25, precip_mm: 0.0, cloud_pct: 10 }
-                      - { date: "2025-10-13", temp_max_c: 12.35, temp_min_c: 5.25, precip_mm: 0.2, cloud_pct: 60 }
+                      - { date: "2025-10-12", temp_max: 11.55, temp_min: 6.25, precip_mm: 0.0, cloud_pct: 10 }
+                      - { date: "2025-10-13", temp_max: 12.35, temp_min: 5.25, precip_mm: 0.2, cloud_pct: 60 }
         '400':
           description: Parámetros inválidos
           content:
@@ -265,9 +265,9 @@ components:
         date:
           type: string
           format: date
-        temp_max_c:
+        temp_max:
           type: number
-        temp_min_c:
+        temp_min:
           type: number
         precip_mm:
           type: number
@@ -276,7 +276,7 @@ components:
           type: integer
           minimum: 0
           maximum: 100
-      required: [date, temp_max_c, temp_min_c, precip_mm, cloud_pct]
+      required: [date, temp_max, temp_min, precip_mm, cloud_pct]
     RecordsResponse:
       type: object
       properties:

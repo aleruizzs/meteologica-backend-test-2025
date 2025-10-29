@@ -136,14 +136,14 @@ async def get_weather(
     out_unit = unit.upper()
     if out_unit == "F":
         for it in payload:
-            if "temp_max_c" in it:
-                it["temp_max_c"] = c_to_f(it["temp_max_c"])
-            if "temp_min_c" in it:
-                it["temp_min_c"] = c_to_f(it["temp_min_c"])
-            if "temp_avg_c" in it:
-                it["temp_avg_c"] = c_to_f(it["temp_avg_c"])
-            if "temp_avg7_c" in it:
-                it["temp_avg7_c"] = c_to_f(it["temp_avg7_c"])
+            if "temp_max" in it:
+                it["temp_max"] = c_to_f(it["temp_max"])
+            if "temp_min" in it:
+                it["temp_min"] = c_to_f(it["temp_min"])
+            if "temp_avg" in it:
+                it["temp_avg"] = c_to_f(it["temp_avg"])
+            if "temp_avg7" in it:
+                it["temp_avg7"] = c_to_f(it["temp_avg7"])
 
     # 6) Respuesta final + guardado en caché
     result = {

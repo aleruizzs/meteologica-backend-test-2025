@@ -15,9 +15,9 @@ def aggregate_daily(items: list[dict]) -> list[dict]:
     for d, vals in sorted(groups.items(), key=lambda kv: kv[0]):
         out.append({
             "date": d,
-            "temp_min_c": min(v["temp_min_c"] for v in vals),
-            "temp_max_c": max(v["temp_max_c"] for v in vals),
-            "temp_avg_c": round(mean((v["temp_min_c"] + v["temp_max_c"]) / 2 for v in vals), 2),
+            "temp_min": min(v["temp_min"] for v in vals),
+            "temp_max": max(v["temp_max"] for v in vals),
+            "temp_avg": round(mean((v["temp_min"] + v["temp_max"]) / 2 for v in vals), 2),
             "precip_total_mm": round(sum(v["precip_mm"] for v in vals), 2),
             "cloud_avg_pct": round(mean(v["cloud_pct"] for v in vals), 2),
         })
@@ -32,14 +32,14 @@ def aggregate_rolling7(items: list[dict]) -> list[dict]:
 
     out: list[dict] = []
     for i, it in enumerate(items_sorted):
-        temps.append((it["temp_min_c"] + it["temp_max_c"]) / 2)
+        temps.append((it["temp_min"] + it["temp_max"]) / 2)
         clouds.append(it["cloud_pct"])
         precs.append(it["precip_mm"])
         if i >= 6:
             w0, w1 = i - 6, i + 1
             out.append({
                 "date": it["date"],
-                "temp_avg7_c": round(mean(temps[w0:w1]), 2),
+                "temp_avg7": round(mean(temps[w0:w1]), 2),
                 "cloud_avg7_pct": round(mean(clouds[w0:w1]), 2),
                 "precip_sum7_mm": round(sum(precs[w0:w1]), 2),
             })

@@ -19,8 +19,8 @@ using ordered_json = nlohmann::ordered_json;
 struct ParsedRow {
     std::string date_iso;  // YYYY-MM-DD
     std::string city;
-    double temp_max_c;
-    double temp_min_c;
+    double temp_max;
+    double temp_min;
     double precip_mm;
     int    cloud_pct;
 };
@@ -150,9 +150,9 @@ int main(int argc, char** argv){
                 r.city = cols[1];
                 if (r.city.empty()) { rows_rejected++; continue; }
                 // Temp max
-                if (!utils::to_double_comma(cols[2], r.temp_max_c)) { rows_rejected++; continue; }
+                if (!utils::to_double_comma(cols[2], r.temp_max)) { rows_rejected++; continue; }
                 // Temp min
-                if (!utils::to_double_comma(cols[3], r.temp_min_c)) { rows_rejected++; continue; }
+                if (!utils::to_double_comma(cols[3], r.temp_min)) { rows_rejected++; continue; }
                 // Precip
                 if (!utils::to_double_comma(cols[4], r.precip_mm)) { rows_rejected++; continue; }
                 if (r.precip_mm < 0.0) { rows_rejected++; continue; }
@@ -160,7 +160,7 @@ int main(int argc, char** argv){
                 if (!utils::to_int(cols[5], r.cloud_pct)) { rows_rejected++; continue; }
                 if (r.cloud_pct < 0 || r.cloud_pct > 100) { rows_rejected++; continue; }
                 // Rango temperaturas
-                if (r.temp_min_c > r.temp_max_c) { rows_rejected++; continue; }
+                if (r.temp_min > r.temp_max) { rows_rejected++; continue; }
 
                 valid_rows.push_back(std::move(r));
                 rows_valid++;
@@ -184,7 +184,7 @@ int main(int argc, char** argv){
                 // INSERT + ON CONFLICT DO NOTHING + RETURNING 1
                 const char* sql =
                     "INSERT INTO weather_readings "
-                    "(date, city, temp_max_c, temp_min_c, precip_mm, cloud_pct) "
+                    "(date, city, temp_max, temp_min, precip_mm, cloud_pct) "
                     "VALUES ($1,$2,$3,$4,$5,$6) "
                     "ON CONFLICT (city, date) DO NOTHING "
                     "RETURNING 1";
@@ -193,8 +193,8 @@ int main(int argc, char** argv){
                     auto r2 = tx.exec_params(sql,
                                             r.date_iso,   // 'YYYY-MM-DD'
                                             r.city,
-                                            r.temp_max_c,
-                                            r.temp_min_c,
+                                            r.temp_max,
+                                            r.temp_min,
                                             r.precip_mm,
                                             r.cloud_pct);
                     if (!r2.empty()) rows_inserted++;
@@ -338,7 +338,7 @@ int main(int argc, char** argv){
 
                 // datos paginados (ordenados por fecha asc)
                 auto rpage = tx.exec_params(
-                    "SELECT date, temp_max_c, temp_min_c, precip_mm, cloud_pct "
+                    "SELECT date, temp_max, temp_min, precip_mm, cloud_pct "
                     "FROM weather_readings "
                     "WHERE city = $1 AND date >= $2 AND date <= $3 "
                     "ORDER BY date ASC "
@@ -352,8 +352,8 @@ int main(int argc, char** argv){
                 for (const auto& row : rpage) {
                     ordered_json item{
                         {"date",       row["date"].c_str()},
-                        {"temp_max_c", row["temp_max_c"].as<double>()},
-                        {"temp_min_c", row["temp_min_c"].as<double>()},
+                        {"temp_max", row["temp_max"].as<double>()},
+                        {"temp_min", row["temp_min"].as<double>()},
                         {"precip_mm",  row["precip_mm"].as<double>()},
                         {"cloud_pct",  row["cloud_pct"].as<int>()}
                     };

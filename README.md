@@ -119,7 +119,7 @@ Respuesta:
   "from": "2025-10-15",
   "to": "2025-10-19",
   "days": [
-    {"date": "2025-10-15", "temp_max_c": 15.75, "temp_min_c": 5.85, "precip_mm": 1.4, "cloud_pct": 80},
+    {"date": "2025-10-15", "temp_max": 15.75, "temp_min": 5.85, "precip_mm": 1.4, "cloud_pct": 80},
     ...
   ]
 }
