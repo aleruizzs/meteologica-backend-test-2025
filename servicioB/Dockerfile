@@ -16,6 +16,10 @@ ENV PATH="/opt/venv/bin:${PATH}" \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copiamos el código de la app para que uvicorn pueda importarlo
+COPY src/ ./src/
+COPY openapi/ ./openapi/
+
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 

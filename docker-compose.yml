@@ -59,7 +59,7 @@ services:
     serviciob:
         build:
             context: ./servicioB
-            target: dev                               # <- usa la stage dev (sí tiene /opt/venv)
+            target: dev
         environment:
             SERVICE_A_BASE_URL: http://servicioa:8080
             CACHE_TTL_SECONDS: "600"
@@ -78,9 +78,10 @@ services:
         ports:
             - "8090:8090"
         restart: unless-stopped
-        command: ["bash","-lc","uvicorn src.main:app --host 0.0.0.0 --port 8090"]
+        # usar python del venv creado en /opt/venv
+        command: ["bash","-lc","/opt/venv/bin/python -m uvicorn src.main:app --host 0.0.0.0 --port 8090"]
         healthcheck:
-            test: ["CMD", "bash", "-lc", "exec 3<>/dev/tcp/127.0.0.1/8090"]
+            test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/health"]
             interval: 5s
             timeout: 3s
             retries: 10
